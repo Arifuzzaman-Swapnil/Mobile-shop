@@ -5,4 +5,36 @@ button, button:focus {
   box-shadow: none !important;
 }
 
+.font-sans {
+  font-family: "Open Sans", serif;
+}
+
+.font-lato {
+  font-family: "Lato", serif;
+}
+
+.font-ubuntu {
+  font-family: "Ubuntu", serif;
+}
+
+.font-size-12 {
+  font-size: 12px;
+}
+
+.font-size-14 {
+  font-size: 14px;
+}
+
+.font-size-16 {
+  font-size: 16px;
+}
+
+.font-size-18 {
+  font-size: 18px;
+}
+
+.font-size-20 {
+  font-size: 20px;
+}
+
 /*# sourceMappingURL=style.css.map */
