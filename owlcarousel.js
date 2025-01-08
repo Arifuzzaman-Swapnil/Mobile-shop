@@ -65,7 +65,7 @@ $(document).ready(function(){
     // product section
     let $qty_up = $(".qty .qty-up");
     let $qty_down = $(".qty .qty-down");
-    // let $input = $(".qty .qty_input");
+    
     // click on up button
     $qty_up.click(function(e){
         let $input = $(`.qty_input[data-id='${$(this).data("id")}']`);
