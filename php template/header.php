@@ -17,6 +17,10 @@
 
     <!-- my css -->
     <link rel="stylesheet" href="style.css">
+
+    <?php
+      require('conn.php');
+    ?>
 </head>
 <body>
   <!-- header section start-->

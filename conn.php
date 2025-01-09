@@ -14,10 +14,13 @@ class DBController
     {
         $this->con = mysqli_connect($this->host, $this->user, $this->password, $this->database);
         if ($this->con->connect_error){
-            echo "Fail " . $this->con->connect_error;
+            echo "Fail " .$this->con->connect_error;
         }
-    }
-
+        // else{
+        //     echo "Okeh";
+        // }
+    
+}
     public function __destruct()
     {
         $this->closeConnection();
