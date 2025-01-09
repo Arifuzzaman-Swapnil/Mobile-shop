@@ -1,7 +1,7 @@
 <?php
     ob_start();
     // include header.php file
-    include ('header.php');
+    include ('php template/header.php');
 ?>
 
 <?php
@@ -17,5 +17,5 @@
 
 <?php
 // include footer.php file
-include ('footer.php');
+include ('php template/footer.php');
 ?>
