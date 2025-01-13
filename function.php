@@ -4,10 +4,10 @@
 require ('conn.php');
 
 // require Product Class
-require ('Product.php');
+require ('productcode.php');
 
 // require Cart Class
-require ('Cart.php');
+require ('cartcode.php');
 
 // DBController object
 $db = new DBController();
