@@ -2,7 +2,9 @@
     include('php template/header.php');
 ?>
 <?php
-    include('php template/shopping-cart.php');
+    
+    count($product->getData('cart')) ? include('php template/shopping-cart.php') :  include ('php template/error/cart-error.php');
+    count($product->getData('wishlist')) ? include ('php template/wishilist.php') :  include ('php template/error/wishlist-error.php');
     include('php template/new-phone.php');
     include('php template/ads-section.php');
     include('php template/blogs.php'); 
