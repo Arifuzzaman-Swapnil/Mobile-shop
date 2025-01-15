@@ -1,100 +1,110 @@
 <?php
 
-// php cart class
+// PHP Cart class
 class Cart
 {
     public $db = null;
-
     public function __construct(DBController $db)
     {
-        if (!isset($db->con)) return null;
+        if (!isset($db->con)) {
+            throw new Exception("Database connection not established.");
+        }
         $this->db = $db;
     }
+    // Insert into cart table
+    public function insertIntoCart($params = null, $table = "cart")
+    {
+        if ($this->db->con != null && $params != null) {
+            // Prepare SQL statement to prevent SQL injection
+            $columns = implode(',', array_keys($params));
+            $placeholders = implode(',', array_fill(0, count($params), '?'));
+            $values = array_values($params);
 
-    // insert into cart table
-    public  function insertIntoCart($params = null, $table = "cart"){
-        if ($this->db->con != null){
-            if ($params != null){
-                // "Insert into cart(user_id) values (0)"
-                // get table columns
-                $columns = implode(',', array_keys($params));
+            $stmt = $this->db->con->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})");
+            $stmt->bind_param(str_repeat('s', count($params)), ...$values);
 
-                $values = implode(',' , array_values($params));
-
-                // create sql query
-                $query_string = sprintf("INSERT INTO %s(%s) VALUES(%s)", $table, $columns, $values);
-
-                // execute query
-                $result = $this->db->con->query($query_string);
-                return $result;
-            }
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
         }
+        return false;
     }
-
-    // to get user_id and item_id and insert into cart table
-    public  function addToCart($userid, $itemid){
-        if (isset($userid) && isset($itemid)){
+    // To get user_id and item_id and insert into cart table
+    public function addToCart($userid, $itemid)
+    {
+        if (is_numeric($userid) && is_numeric($itemid)) {
             $params = array(
                 "user_id" => $userid,
                 "item_id" => $itemid
             );
-
-            // insert data into cart
             $result = $this->insertIntoCart($params);
-            if ($result){
-                // Reload Page
+            if ($result) {
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit;
             }
         }
     }
+    // Delete cart item using cart item id
+    public function deleteCart($item_id = null, $table = 'cart')
+    {
+        if (is_numeric($item_id)) {
+            $stmt = $this->db->con->prepare("DELETE FROM {$table} WHERE item_id = ?");
+            $stmt->bind_param('i', $item_id);
 
-    // delete cart item using cart item id
-    public function deleteCart($item_id = null, $table = 'cart'){
-        if($item_id != null){
-            $result = $this->db->con->query("DELETE FROM {$table} WHERE item_id={$item_id}");
-            if($result){
-                header("Location:" . $_SERVER['PHP_SELF']);
+            $result = $stmt->execute();
+            $stmt->close();
+
+            if ($result) {
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit;
             }
             return $result;
         }
+        return false;
     }
-
-    // calculate sub total
-    public function getSum($arr){
-        if(isset($arr)){
-            $sum = 0;
-            foreach ($arr as $item){
-                $sum += floatval($item[0]);
-            }
-            return sprintf('%.2f' , $sum);
+    // Calculate sub total
+    public function getSum($arr)
+    {
+        if (is_array($arr)) {
+            $sum = array_reduce($arr, function ($carry, $item) {
+                return $carry + floatval($item[0]);
+            }, 0);
+            return sprintf('%.2f', $sum);
         }
+        return '0.00';
     }
-
-    // get item_it of shopping cart list
-    public function getCartId($cartArray = null, $key = "item_id"){
-        if ($cartArray != null){
-            $cart_id = array_map(function ($value) use($key){
+    // Get item_id of shopping cart list
+    public function getCartId($cartArray = null, $key = "item_id")
+    {
+        if (is_array($cartArray)) {
+            return array_map(function ($value) use ($key) {
                 return $value[$key];
             }, $cartArray);
-            return $cart_id;
         }
+        return [];
     }
-
     // Save for later
-    public function saveForLater($item_id = null, $saveTable = "wishlist", $fromTable = "cart"){
-        if ($item_id != null){
-            $query = "INSERT INTO {$saveTable} SELECT * FROM {$fromTable} WHERE item_id={$item_id};";
-            $query .= "DELETE FROM {$fromTable} WHERE item_id={$item_id};";
+    public function saveForLater($item_id = null, $saveTable = "wishlist", $fromTable = "cart")
+    {
+        if (is_numeric($item_id)) {
+            $this->db->con->begin_transaction();
+            try {
+                $stmt1 = $this->db->con->prepare("INSERT INTO {$saveTable} SELECT * FROM {$fromTable} WHERE item_id = ?");
+                $stmt1->bind_param('i', $item_id);
+                $stmt1->execute();
 
-            // execute multiple query
-            $result = $this->db->con->multi_query($query);
+                $stmt2 = $this->db->con->prepare("DELETE FROM {$fromTable} WHERE item_id = ?");
+                $stmt2->bind_param('i', $item_id);
+                $stmt2->execute();
 
-            if($result){
-                header("Location :" . $_SERVER['PHP_SELF']);
+                $this->db->con->commit();
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit;
+            } catch (Exception $e) {
+                $this->db->con->rollback();
+                throw $e;
             }
-            return $result;
         }
+        return false;
     }
-
-
 }

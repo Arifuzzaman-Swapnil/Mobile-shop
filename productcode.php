@@ -7,8 +7,9 @@ class Product
 
     public function __construct(DBController $db)
     {
-        if (!isset($db->con)) 
-            return null;
+        if (!isset($db->con)) {
+            throw new Exception("Database connection not established");
+        }
         $this->db = $db;
     }
 
@@ -27,7 +28,7 @@ class Product
     }
 
     // get product using item id
-    public function getProduct($item_id = null, $table= 'product'){
+    public function getProduct($item_id = null, $table = 'product'){
         if (isset($item_id)){
             $result = $this->db->con->query("SELECT * FROM {$table} WHERE item_id={$item_id}");
 
@@ -41,5 +42,4 @@ class Product
             return $resultArray;
         }
     }
-
 }
